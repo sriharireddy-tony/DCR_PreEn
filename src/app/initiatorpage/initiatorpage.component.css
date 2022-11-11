@@ -1,0 +1,40 @@
+.detailgrid{
+    background-color: rgb(182, 182, 182);
+    padding: 5px;
+    border-radius: 2px;
+}
+.form-label.required::after{
+    content:"*";
+    color: red;
+    font-size:18px;
+}
+.boxborderred{
+    border: 1px solid red;
+}
+.searchicon{
+   position:absolute;
+   right: 9px;
+   top: 7px;
+   font-size: 28px;
+   color: grey;
+}
+.input-box{
+    position: relative;
+  }
+  input[type=text] {
+    -webkit-appearance: none;
+    -moz-appearance:    none;
+    appearance:         none;
+}
+.datepickericon{
+    position:absolute;
+    right: 8%;
+    top: 52%;
+    font-size: 28px;
+    color: grey;
+ }
+ #datepickIcon{
+    position:absolute;
+    top: 30px !important;
+    right: 15px !important;
+  }

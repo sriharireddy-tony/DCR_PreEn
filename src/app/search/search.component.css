@@ -1,0 +1,26 @@
+.searchicon{
+    position:absolute;
+    right: 9px;
+    top: 7px;
+    font-size: 28px;
+    color: grey;
+ }
+
+ .input-box{
+    position: relative;
+  }
+
+  .form-label{
+    font-size: 15px;
+  }
+  .pagination /deep/ .ngx-pagination .current{
+background-color: rgb(124, 124, 124);
+  }
+  .pagination{
+    float: right;
+  }
+  #datepickIcon{
+    position:absolute;
+    top: 0px !important;
+    right: 3px !important;
+  }

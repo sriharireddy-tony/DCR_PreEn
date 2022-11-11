@@ -1,0 +1,17 @@
+
+.main{
+    border-bottom: 2px solid red; 
+    margin-top: 0px;
+   
+}
+/* .nav-item:hover{
+    background-color: red;
+} */
+#navbarNav>.navbar-nav>.nav-item>.nav-link {
+    background-color: rgb(236, 234, 234);
+    border-radius: 2px;
+}
+.active {
+    background-color: rgb(248, 64, 64) !important;
+    color: white !important;
+}

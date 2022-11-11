@@ -1,0 +1,15 @@
+.head{
+    color: aliceblue;
+    background-color: rgb(248, 64, 64);
+}
+.headimg{ 
+    padding: 3px;
+}
+.headlogo{
+    text-align: center;
+    justify-content: space-between;
+}
+
+
+
+

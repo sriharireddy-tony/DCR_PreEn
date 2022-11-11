@@ -1,0 +1,40 @@
+
+    <div class="container-fluid" style="padding-left: 118px; padding-right: 118px ;">
+        <div class="col-lg-12">
+            <div class="main">
+                <nav class="navbar navbar-expand-sm navbar-light" style="padding-bottom: 0px;">
+                    <div class="container">
+                        <div class="collapse navbar-collapse" id="navbarNav" >
+                            <ul class="navbar-nav nav-tabs">
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link btn" routerLink="/home" routerLinkActive="active" >
+                                        <b>Initiator</b>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link btn" routerLink="/inbox" routerLinkActive="active"><b>Inbox</b></a>
+                                </li>
+                                <li class="nav-item mx-1">
+                                    <a class="nav-link btn" routerLink="/search" routerLinkActive="active"><b>Search</b></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                </div>
+        </div>
+    </div>
+
+<!-- <div *ngIf="tabHide == 'initiator'">
+<app-initiatorpage></app-initiatorpage>
+</div>
+<div *ngIf="tabHide == 'inbox'">
+    <app-inbox></app-inbox>
+</div>
+<div *ngIf="tabHide == 'search'">
+    <app-search></app-search>
+</div> -->
+
+<router-outlet></router-outlet>
+
+
