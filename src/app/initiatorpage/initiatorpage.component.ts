@@ -389,7 +389,6 @@ export class InitiatorpageComponent implements OnInit {
 
           })
     }
-
   }
 
   submit() {
@@ -644,7 +643,6 @@ export class InitiatorpageComponent implements OnInit {
 
     this.docData.filesArray.forEach((element1: any) => {
       element1.isChecked = event.target.checked
-
     });
     this.tdCheckbox();
   }
