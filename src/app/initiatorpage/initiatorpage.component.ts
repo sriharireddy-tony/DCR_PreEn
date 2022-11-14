@@ -18,6 +18,7 @@ export class InitiatorpageComponent implements OnInit {
   [x: string]: any;
 
   namespace: string = "http://schemas.cordys.com/clotp_metadata";
+  taskId: string | undefined;
   submitted = false;
   res_type_selected: string = "show"
   fileUploadDoc: any;
@@ -50,6 +51,7 @@ export class InitiatorpageComponent implements OnInit {
 
   TaskDetails: any;
   approvalStage: number | undefined;
+  approvalRole: string | undefined;
 
   private filterHOD(value: any): string[] {
 
@@ -119,13 +121,13 @@ export class InitiatorpageComponent implements OnInit {
 
   loadCLOTPPage() {
     this.activatedRoute.queryParams.subscribe((params: any) => {
-      let taskId = params.taskId;
+      this.taskId = params.taskId;
       this.CLOTP_Number = params.CLOTP_NO;
-      if (this.datavalidate(taskId) != "") {
+      if (this.datavalidate(this.taskId) != "") {
         $.cordys.json.defaults.removeNamespacePrefix = true;
 
         var param = {
-          TaskId: this.datavalidate(taskId),
+          TaskId: this.datavalidate(this.taskId),
           Target: '',
           RetrievePossibleActions: 'false',
           ReturnTaskData: 'true'
@@ -138,7 +140,7 @@ export class InitiatorpageComponent implements OnInit {
 
             this.CLOTP_Number = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.CLOTP_NO;
             this.approvalStage = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVAL_STAGE;
-            let approvalRole = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVER_ROLE;
+            this.approvalRole = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVER_ROLE;
            this.getDetails();
           })
         }
@@ -192,6 +194,21 @@ export class InitiatorpageComponent implements OnInit {
           }
         })
 
+  }
+
+  completeTask(status: any){
+  
+  let params={
+    TASKID: this.taskId,
+    APPROVAL_DECISION:status,
+    APPROVAL_REMARKS :"",
+  }
+  this.service.ajax("CompleteCLOTPTask", this.namespace, params).
+  then((res: any) => {
+    if (res.hasOwnProperty('tuple')) { 
+        this.toast.success("Approved sucessfully")
+    }
+    })
   }
 
   getloginUserDetails(): void {
@@ -358,8 +375,8 @@ export class InitiatorpageComponent implements OnInit {
                 "PROJECT": (this.requestdetailform.controls['project'].value ? this.requestdetailform.controls['project'].value : ""),
                 "NOOFRESOURCES": (this.requestdetailform.controls['noofresources'].value ? this.requestdetailform.controls['noofresources'].value : ""),
                 "RESOURCEDEPARTMENT": (this.requestdetailform.controls['resourcedepartment'].value ? this.requestdetailform.controls['resourcedepartment'].value : ""),
-                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""),'dd-MM-yy'),
-                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""),'dd-MM-yy'),
+                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""),'yyyy-MM-dd'),
+                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""),'yyyy-MM-dd'),
                 "JUSTIFICATION": (this.requestdetailform.controls['justifiaction'].value ? this.requestdetailform.controls['justifiaction'].value : ""),
                 "DEPARTMENTHOD": (this.requestdetailform.controls['HODControl'].value ? this.requestdetailform.controls['HODControl'].value : ""),
                 "HR": (this.requestdetailform.controls['HRControl'].value ? this.requestdetailform.controls['HRControl'].value : ""),

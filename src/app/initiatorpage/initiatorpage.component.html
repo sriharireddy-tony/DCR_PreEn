@@ -201,7 +201,7 @@
 </div>
 </form>
 
-<div class="mt-5 ">
+<div class="mt-5" *ngIf="approvalRole == 'HOD'">
     <mat-accordion>
         <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false">
             <mat-expansion-panel-header>
@@ -240,10 +240,20 @@
 </div>
 
 <div class="col-lg-12 text-center mt-5">
+    <div *ngIf="approvalRole != 'HOD'">
     <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="save()">
         <mat-icon class="text-red">save</mat-icon>Save
     </button>
     <button type="button" class="btn btn-sm btn-danger mx-2" (click)="submit()">
         <mat-icon class="text-red">done</mat-icon>Submit
     </button>
+</div>
+<div *ngIf="approvalRole == 'HOD'">
+    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="completeTask('0')">
+        <mat-icon class="text-red">close</mat-icon>Reject
+    </button>
+    <button type="button" class="btn btn-sm btn-danger mx-2" (click)="completeTask('1')">
+        <mat-icon class="text-red">done</mat-icon>Approve
+    </button>
+</div>
 </div>

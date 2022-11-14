@@ -15,7 +15,9 @@ export class SearchComponent implements OnInit {
   namespace: string = "http://schemas.cordys.com/clotp_metadata";
 
 
-search: any=[];
+  search: any = [];
+  param: any;
+  flag: boolean | undefined;
 
   requestNumber: string | undefined;
   requestName: string | undefined;
@@ -25,15 +27,15 @@ search: any=[];
   toDate: string | undefined;
   status: string | undefined;
 
-  searchData: any =[];
- show = false;
-  totalLength: number= 0;
+  searchData: any = [];
+  show = false;
+  totalLength: number = 0;
   page = 1;
 
-  constructor( private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router) { }
+  constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router) { }
 
   ngOnInit(): void {
-  
+
   }
 
 
@@ -41,51 +43,74 @@ search: any=[];
     this.page = event;
   }
 
-  clear(){
-    this.search =[];
+  clear() {
+    this.search = [];
   }
 
-  searchAll() {
-    this.searchData =[];
-    this.totalLength= 0;
-let param = {
+  searchitems(item: any) {
+    this.searchData = [];
+    this.totalLength = 0;
+    this.flag = true;
 
-  'RequestNumber': this.datavalidate(this.search.requestNumber),
-  'TokenName':  this.datavalidate(this.search.requestName),
-  'ResourceType': this.datavalidate(this.search.resourceType),
-  'ResourceDepartment': this.datavalidate(this.search.resourceDepartment),
-  'FromDate': this.datavalidate(this.search.fromDate),
-  'ToDate': this.datavalidate(this.search.toDate),
-  'Stage': this.datavalidate(this.search.status)
-}
-
-var resp = this.service.ajax("SearchCLOTPDetails", this.namespace, param).
-      then((ajaxResponse: any) => {
-        
-        if (ajaxResponse.hasOwnProperty('tuple')) {
-          this.searchData = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'CLOTP_DETAILS');
-          this.totalLength=  this.searchData.length;
+    switch (item) {
+      case 'requestNumber':
+        this.datavalidate(this.search.requestNumber) == "" ? this.flag = false : this.param = { 'RequestNumber': this.datavalidate(this.search.requestNumber) }
+        break;
+      case 'requestName':
+        this.datavalidate(this.search.requestName) == "" ? this.flag = false : this.param = { 'TokenName': this.datavalidate(this.search.requestName) }
+        break;
+      case 'resourceType':
+        this.datavalidate(this.search.resourceType) == "" ? this.flag = false : this.param = { 'ResourceType': this.datavalidate(this.search.resourceType) }
+        break;
+      case 'resourceDepartment':
+        this.datavalidate(this.search.resourceDepartment) == "" ? this.flag = false : this.param = { 'ResourceDepartment': this.datavalidate(this.search.resourceDepartment) }
+        break;
+      case 'fromDate':
+        this.datavalidate(this.search.fromDate) == "" ? this.flag = false : this.param = { 'FromDate': this.datavalidate(this.search.fromDate) }
+        break;
+      case 'toDate':
+        this.datavalidate(this.search.toDate) == "" ? this.flag = false : this.param = { 'ToDate': this.datavalidate(this.search.toDate) }
+        break;
+      case 'status':
+        this.datavalidate(this.search.status) == "" ? this.flag = false : this.param = { 'Stage': this.datavalidate(this.search.status) }
+        break;
+      case 'selectAll':
+        this.param = {
+          'RequestNumber': this.datavalidate(this.search.requestNumber),
+          'TokenName': this.datavalidate(this.search.requestName),
+          'ResourceType': this.datavalidate(this.search.resourceType),
+          'ResourceDepartment': this.datavalidate(this.search.resourceDepartment),
+          'FromDate': this.datavalidate(this.search.fromDate),
+          'ToDate': this.datavalidate(this.search.toDate),
+          'Stage': this.datavalidate(this.search.status)
         }
-        this.show =  this.totalLength==0 ? true : false;
-
-      })
+        break;
+      default:
+        break;
+    }
+    this.flag ?
+      this.service.ajax("SearchCLOTPDetails", this.namespace, this.param)
+        .then((ajaxResponse: any) => {
+          if (ajaxResponse.hasOwnProperty('tuple')) {
+            this.searchData = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'CLOTP_DETAILS');
+            this.totalLength = this.searchData.length;
+          }
+          this.show = this.totalLength == 0 ? true : false;
+        })
+      : this.toast.error("fill data at least one field!")
   }
 
-  showSearchCLOTP(requestNumber: string){
+  showSearchCLOTP(requestNumber: string) {
     let param = {
       'REQUEST_NUMBER': this.datavalidate(requestNumber),
     }
-   this.service.ajax("GetCLOTPNoByreqNODetails", this.namespace, param)
-          .then((ajaxResponse: any) => {
-            if (ajaxResponse.hasOwnProperty('tuple')) {
-              let CLOTP_NO =ajaxResponse.tuple.old.CLOTP_DETAILS.CLOTP_NO
-              this.router.navigate(['/home'],{ queryParams: { CLOTP_NO: CLOTP_NO } });
-            }
-          })
-  }
-
-  click(){
-    alert("calling")
+    this.service.ajax("GetCLOTPNoByreqNODetails", this.namespace, param)
+      .then((ajaxResponse: any) => {
+        if (ajaxResponse.hasOwnProperty('tuple')) {
+          let CLOTP_NO = ajaxResponse.tuple.old.CLOTP_DETAILS.CLOTP_NO
+          this.router.navigate(['/home'], { queryParams: { CLOTP_NO: CLOTP_NO } });
+        }
+      })
   }
 
   datavalidate(data: string | null | undefined) {
