@@ -1,7 +1,7 @@
 <form [formGroup]="requestdetailform">
 <div class="mt-5 ">
     <mat-accordion>
-        <mat-expansion-panel (opened)="panelOpenState = true" (closed)="panelOpenState = false">
+        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide">
             <mat-expansion-panel-header>
                 <mat-panel-description class="detailgrid">
                     <h2>Request Details</h2>
@@ -21,10 +21,10 @@
                         <div class="col-lg-3">
                             <label class="form-label required">Resource Type</label>
                             <select formControlName="resourcetype" class="form-select"
-                                [ngClass]="{'boxborderred': submitted && resourcetype?.invalid}"
-                                (change)="res_typeChange(sel.value)" #sel>
-                                <option value="default">-- select --</option>
-                                <option *ngFor="let item of ResourceTypeDropdown">{{item}}</option>
+                                [ngClass]="{'boxborderred': submitted && resourcetype?.invalid ,'dIconHide': !submitBtnHide}"
+                                (change)="res_typeChange(sel.value)"  #sel>
+                                <option value="">-- select --</option>
+                                <option *ngFor="let item1 of ResourceTypeDropdown"  [ngValue]="item1">{{item1}}</option>
                             </select>
                         </div>
                         <div class="col-lg-3">
@@ -37,9 +37,9 @@
                         <div class="col-lg-3">
                             <label class="form-label required">Project</label>
                             <select formControlName="project" class="form-select"
-                                [ngClass]="{'boxborderred': submitted && project?.invalid}">
-                                <option value="default">-- select --</option>
-                                <option *ngFor="let item of ResourceDeptNameDropdown">{{item}}</option>
+                                [ngClass]="{'boxborderred': submitted && project?.invalid, 'dIconHide': !submitBtnHide}">
+                                <option value="">-- select --</option>
+                                <option *ngFor="let item2 of ResourceDeptNameDropdown" [ngValue]="item2">{{item2}}</option>
                             </select>
                         </div>
                         <div class="col-lg-3">
@@ -50,9 +50,9 @@
                         <div class="col-lg-3">
                             <label class="form-label required">Resource Department</label>
                             <select class="form-select" formControlName="resourcedepartment"
-                                [ngClass]="{'boxborderred': submitted && resourcedepartment?.invalid}">
-                                <option value="default">-- select --</option>
-                                <option *ngFor="let item of ResourceDeptDropdown">{{item}}</option>
+                                [ngClass]="{'boxborderred': submitted && resourcedepartment?.invalid, 'dIconHide': !submitBtnHide}">
+                                <option value="">-- select --</option>
+                                <option *ngFor="let item3 of ResourceDeptDropdown" [ngValue]="item3">{{item3}}</option>
                             </select>
                         </div>
                         <div class="col-lg-3 input-box">
@@ -87,20 +87,21 @@
     </mat-accordion>
 </div>
 
-<div class="mt-5 ">
+<div class="mt-5 " >
     <mat-accordion>
-        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false">
+        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide" >
             <mat-expansion-panel-header>
                 <mat-panel-description class="detailgrid">
                     <h2>Documents</h2>
                 </mat-panel-description>
             </mat-expansion-panel-header>
-            <div class="col-lg-12 mt-4">
+            <form >
+            <div class="col-lg-12 mt-4" >
                 <div class="row">
                     <div class="container">
                         <table class="table table-bordered">
                             <thead>
-                                <tr class="bg-secondary text-white">
+                                <tr class="bg-secondary text-white" >
                                     <th><input type="checkbox" [checked]="isAllCheckBoxChecked() && thChecked"
                                             (change)="checkAllCheckBox($event)"></th>
                                     <th>Document Name</th>
@@ -116,7 +117,6 @@
                                     <td>{{ item.DOC_NAME }}</td>
                                     <td>{{ item.UPLOADED_BY }}</td>
                                     <td>{{ item.UPLOADED_ON }}</td>
-
                                 </tr>
                                 <tr>
                                     <button class=" btn bg-dark mx-1" type="button" (click)="deleteFile()">
@@ -135,6 +135,7 @@
                     </div>
                 </div>
             </div>
+        </form>
         </mat-expansion-panel>
     </mat-accordion>
 </div>
@@ -201,9 +202,9 @@
 </div>
 </form>
 
-<div class="mt-5" *ngIf="approvalRole == 'HOD'">
+<div class="mt-5" *ngIf="!submitBtnHide">
     <mat-accordion>
-        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false">
+        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide">
             <mat-expansion-panel-header>
                 <mat-panel-description class="detailgrid">
                     <h2>Workflow History</h2>
@@ -240,7 +241,7 @@
 </div>
 
 <div class="col-lg-12 text-center mt-5">
-    <div *ngIf="approvalRole != 'HOD'">
+    <div *ngIf="submitBtnHide">
     <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="save()">
         <mat-icon class="text-red">save</mat-icon>Save
     </button>
@@ -248,7 +249,7 @@
         <mat-icon class="text-red">done</mat-icon>Submit
     </button>
 </div>
-<div *ngIf="approvalRole == 'HOD'">
+<div *ngIf="!submitBtnHide">
     <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="completeTask('0')">
         <mat-icon class="text-red">close</mat-icon>Reject
     </button>

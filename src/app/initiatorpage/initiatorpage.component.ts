@@ -16,10 +16,12 @@ declare var $: any, _: any;
 })
 export class InitiatorpageComponent implements OnInit {
   [x: string]: any;
+  documentpanel = false;
 
   namespace: string = "http://schemas.cordys.com/clotp_metadata";
   taskId: string | undefined;
   submitted = false;
+  submitBtnHide = true;
   res_type_selected: string = "show"
   fileUploadDoc: any;
   ResourceTypeDropdown: any = [];
@@ -81,23 +83,23 @@ export class InitiatorpageComponent implements OnInit {
 
 
   constructor(private fb: FormBuilder, private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private dtpipe: DatePipe,
-    private activatedRoute: ActivatedRoute) {
+    private activatedRoute: ActivatedRoute, private router: Router) {
 
     this.docData.filesArray = [];
-
+    this.getLovDetails();
+    this.loadCLOTPPage();
+    this.getloginUserDetails();
 
   }
   deleteBtnDisable = false;
 
   ngOnChanges(changes: SimpleChanges): void {
 
-
+    
   }
   ngOnInit(): void {
-    this.loadCLOTPPage();
-    this.getloginUserDetails();
-    this.getLovDetails();
-
+    
+   
   }
 
   ngAfterViewInit() {
@@ -141,6 +143,11 @@ export class InitiatorpageComponent implements OnInit {
             this.CLOTP_Number = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.CLOTP_NO;
             this.approvalStage = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVAL_STAGE;
             this.approvalRole = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVER_ROLE;
+
+            if(this.approvalRole == 'HOD'||this.approvalRole == 'CPH'||this.approvalRole == 'HR'||this.approvalRole == 'FDPD'||this.approvalRole == 'FINANCE'){
+              this.submitBtnHide = false;
+              this.requestdetailform.disable()
+            }
            this.getDetails();
           })
         }
@@ -187,7 +194,7 @@ export class InitiatorpageComponent implements OnInit {
       let param3 = {
         'APP_REFNO': this.CLOTP_Number,
       };
-      this.service.ajax("GetClotpAutoApprovalHistoryObjectsForAppRefno", this.namespace, param3).
+      this.service.ajax("GetCLOTPAAHDetails", this.namespace, param3).
         then((CLOTPAAHResponse: any) => {
           if (CLOTPAAHResponse.hasOwnProperty('tuple')) {
             this.CLOTPAAHArr = this.convtojson.convertTupleToJson(CLOTPAAHResponse.tuple, 'CLOTP_AUTO_APPROVAL_HISTORY');
@@ -198,15 +205,20 @@ export class InitiatorpageComponent implements OnInit {
 
   completeTask(status: any){
   
+    let textMSG= status == '0' ? "Task Rejected Successfully" : status == '1' ? "Task Approved Successfully" : "Task Resubmitted Successfully";
+
   let params={
     TASKID: this.taskId,
     APPROVAL_DECISION:status,
-    APPROVAL_REMARKS :"",
+    APPROVAL_REMARKS :"hello srihari",
   }
-  this.service.ajax("CompleteCLOTPTask", this.namespace, params).
-  then((res: any) => {
+  this.service.ajax("CompleteCLOTPTask", this.namespace, params)
+  .then((res: any) => {
     if (res.hasOwnProperty('tuple')) { 
-        this.toast.success("Approved sucessfully")
+        this.toast.success(textMSG)
+        setTimeout(()=>{                   
+          this.router.navigate(['/inbox'])
+        }, 500);
     }
     })
   }
@@ -264,6 +276,8 @@ export class InitiatorpageComponent implements OnInit {
               this.ResourceDeptDropdown.push(ele.CLOTP_DESC)
             }
           })
+          this.convtojson.resTypeArr(this.ResourceTypeDropdown);
+          this.convtojson.resDeptArr(this.ResourceDeptDropdown);
         }
       },
         (err) => {
@@ -350,8 +364,8 @@ export class InitiatorpageComponent implements OnInit {
                 "PROJECT": (this.requestdetailform.controls['project'].value ? this.requestdetailform.controls['project'].value : ""),
                 "NOOFRESOURCES": (this.requestdetailform.controls['noofresources'].value ? this.requestdetailform.controls['noofresources'].value : ""),
                 "RESOURCEDEPARTMENT": (this.requestdetailform.controls['resourcedepartment'].value ? this.requestdetailform.controls['resourcedepartment'].value : ""),
-                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""),'dd-MM-yy'),
-                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""),'dd-MM-yy'),
+                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""),'yyyy-MM-dd'),
+                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""),'yyyy-MM-dd'),
                 "JUSTIFICATION": (this.requestdetailform.controls['justifiaction'].value ? this.requestdetailform.controls['justifiaction'].value : ""),
                 "DEPARTMENTHOD": (this.requestdetailform.controls['HODControl'].value ? this.requestdetailform.controls['HODControl'].value : ""),
                 "HR": (this.requestdetailform.controls['HRControl'].value ? this.requestdetailform.controls['HRControl'].value : ""),
@@ -418,6 +432,7 @@ export class InitiatorpageComponent implements OnInit {
         then((ajaxResponse: any) => {
           if (ajaxResponse.data.instance_id != "") {
             this.toast.success('Data Submitted Successfully')
+            this.router.navigate(['/inbox'])
           }
         })
     }
@@ -453,22 +468,21 @@ export class InitiatorpageComponent implements OnInit {
   }
 
   res_typeChange(e: any) {
-    let val = e;
-    if (val == "Resource week OTP") {
+    if (e.includes("Resource week OTP")){
       this.res_type_selected = "Resource week OTP"
       this.CPHControl.setValidators(null);
       this.FDPDControl.setValidators(null);
     }
-    else if (val == "Project OTP") {
+    else if (e.includes("Project OTP")) {
       this.res_type_selected = "Project OTP"
       this.CPHControl.setValidators(null);
     }
-    else if (val == "Casual Labour-Dept") {
+    else if (e.includes("Casual Labour-Dept")) {
       this.res_type_selected = "Casual Labour-Dept"
       this.HRControl.setValidators(null);
       this.CPHControl.setValidators(null);
     }
-    else if (val == "Casual Labour-Project") {
+    else if (e.includes("Casual Labour-Project")) {
       this.res_type_selected = "Casual Labour-Project"
       this.HRControl.setValidators(null);
     }
@@ -652,8 +666,6 @@ export class InitiatorpageComponent implements OnInit {
   }
 
   // Document table checkbox code
-  panelOpenState = true;
-  documentpanel = true;
 
 
   checkAllCheckBox(event: any) {

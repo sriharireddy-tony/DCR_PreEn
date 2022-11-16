@@ -15,18 +15,4 @@ export class InitiatorComponent implements OnInit {
     
   }
 
-// tabHide :string ="initiator";
-
-//   tabChange(arg :string){
-//      if(arg === 'initiator'){
-//       // this.childComponenet = "app-initiatorpage" 
-//       this.tabHide ="initiator"
-//      }
-//      if(arg === 'inbox'){
-//       this.tabHide ="inbox"
-//     }
-//     if(arg === 'search'){
-//       this.tabHide ="search"
-//     }
-//   }
 }

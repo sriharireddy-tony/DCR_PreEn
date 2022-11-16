@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, SimpleChanges } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { CommonServicesService } from '../services/common-services.service';
 import { SOAPCallService } from '../services/soapcall.service';
 import { Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-search',
@@ -32,12 +33,23 @@ export class SearchComponent implements OnInit {
   totalLength: number = 0;
   page = 1;
 
-  constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router) { }
-
-  ngOnInit(): void {
-
+  resTypeArr: any =[]
+  resDeptArr: any =[]
+  constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router,private dtpipe: DatePipe) {
+    
+   }
+   ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes)
   }
 
+  ngOnInit(): void {
+    this.convtojson.var1.subscribe ((val : any)  =>{
+      this.resTypeArr = val;
+    })
+    this.convtojson.var2.subscribe ((val1 : any)  =>{
+      this.resDeptArr = val1;
+    })
+  }
 
   handlePageChange(event: number) {
     this.page = event;
@@ -66,10 +78,10 @@ export class SearchComponent implements OnInit {
         this.datavalidate(this.search.resourceDepartment) == "" ? this.flag = false : this.param = { 'ResourceDepartment': this.datavalidate(this.search.resourceDepartment) }
         break;
       case 'fromDate':
-        this.datavalidate(this.search.fromDate) == "" ? this.flag = false : this.param = { 'FromDate': this.datavalidate(this.search.fromDate) }
+        this.datavalidate(this.search.fromDate) == "" ? this.flag = false : this.param = { 'FromDate': this.dtpipe.transform(this.datavalidate(this.search.fromDate), 'dd-MM-yy')}
         break;
       case 'toDate':
-        this.datavalidate(this.search.toDate) == "" ? this.flag = false : this.param = { 'ToDate': this.datavalidate(this.search.toDate) }
+        this.datavalidate(this.search.toDate) == "" ? this.flag = false : this.param = { 'ToDate': this.dtpipe.transform(this.datavalidate(this.search.toDate), 'dd-MM-yy') }
         break;
       case 'status':
         this.datavalidate(this.search.status) == "" ? this.flag = false : this.param = { 'Stage': this.datavalidate(this.search.status) }
@@ -80,8 +92,8 @@ export class SearchComponent implements OnInit {
           'TokenName': this.datavalidate(this.search.requestName),
           'ResourceType': this.datavalidate(this.search.resourceType),
           'ResourceDepartment': this.datavalidate(this.search.resourceDepartment),
-          'FromDate': this.datavalidate(this.search.fromDate),
-          'ToDate': this.datavalidate(this.search.toDate),
+          'FromDate': this.dtpipe.transform(this.datavalidate(this.search.fromDate), 'dd-MM-yy'),
+          'ToDate': this.dtpipe.transform(this.datavalidate(this.search.toDate), 'dd-MM-yy'),
           'Stage': this.datavalidate(this.search.status)
         }
         break;

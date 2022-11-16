@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -38,4 +39,14 @@ datavalidate(data: string | null | undefined) {
         return "";
     }
 }
+
+var1 = new BehaviorSubject<any>([]);
+var2 = new BehaviorSubject<any>([]);
+
+resTypeArr(data: any[]){
+    this.var1.next(data);
+  }
+  resDeptArr(data: any[]){
+    this.var2.next(data);
+  }
 }
