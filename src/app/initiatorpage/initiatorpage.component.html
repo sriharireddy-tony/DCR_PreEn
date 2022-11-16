@@ -111,7 +111,7 @@
 
                             </thead>
                             <tbody>
-                                <tr *ngFor="let item of docData.filesArray; let i=index;">
+                                <tr *ngFor="let item of docData.filesArray; let i=index;" disabled>
                                     <td><input type="checkbox" value="{{item.DOC_NAME}}" (change)="tdCheckbox()"
                                             [(ngModel)]="item.isChecked" [ngModelOptions]="{standalone: true}"></td>
                                     <td>{{ item.DOC_NAME }}</td>
@@ -147,7 +147,7 @@
             <div class="input-box rounded">
                 <input type="text" class="form-control rounded-left" placeholder="Search"
                 formControlName="HODControl" [matAutocomplete]="autoHOD" [ngClass]="{'boxborderred': submitted && HODControl?.invalid}"/>
-                <mat-icon class="searchicon">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoHOD="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsHOD | async" [value]="option">
                       {{option}}
@@ -162,7 +162,7 @@
             <div class="input-box rounded">
                 <input type="text" class="form-control rounded-left" placeholder="Search"
                 formControlName="HRControl" [matAutocomplete]="autoHR" [ngClass]="{'boxborderred': submitted && HRControl?.invalid}"/>
-                <mat-icon class="searchicon">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoHR="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsHR | async" [value]="option">
                         {{option}}
@@ -176,7 +176,7 @@
             <div class="input-box rounded">
                 <input type="text" class="form-control rounded-left" placeholder="Search"
                 formControlName="CPHControl" [matAutocomplete]="autoCPH" [ngClass]="{'boxborderred': submitted && CPHControl?.invalid}"/>
-                <mat-icon class="searchicon">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoCPH="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsCPH | async" [value]="option">
                         {{option}}
@@ -189,7 +189,7 @@
             <div class="input-box rounded">
                 <input type="text" class="form-control rounded-left" placeholder="Search"
                 formControlName="FDPDControl" [matAutocomplete]="autoFDPD" [ngClass]="{'boxborderred': submitted && FDPDControl?.invalid}"/>
-                <mat-icon class="searchicon">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoFDPD="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsFDPD | async" [value]="option">
                         {{option}}
@@ -239,8 +239,15 @@
         </mat-expansion-panel>
     </mat-accordion>
 </div>
-
-<div class="col-lg-12 text-center mt-5">
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-6" >
+            <div *ngIf="!submitBtnHide">
+            <label class="form-label">Remarks</label>
+            <input class="form-control" type="text" [(ngModel)]="remarks" [ngModelOptions]="{standalone: true}">
+        </div>
+        </div>
+<div class="col-lg-6" style="margin-top:3%;">
     <div *ngIf="submitBtnHide">
     <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="save()">
         <mat-icon class="text-red">save</mat-icon>Save
@@ -250,11 +257,13 @@
     </button>
 </div>
 <div *ngIf="!submitBtnHide">
-    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="completeTask('0')">
+    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="rejectTask('0')">
         <mat-icon class="text-red">close</mat-icon>Reject
     </button>
     <button type="button" class="btn btn-sm btn-danger mx-2" (click)="completeTask('1')">
         <mat-icon class="text-red">done</mat-icon>Approve
     </button>
+</div>
+</div>
 </div>
 </div>

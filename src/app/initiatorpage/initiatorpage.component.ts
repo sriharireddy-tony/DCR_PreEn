@@ -38,6 +38,7 @@ export class InitiatorpageComponent implements OnInit {
   HRUsersArr: any = [];
   CPHUsersArr: any = [];
   FDPDUsersArr: any = [];
+  remarks: string | undefined;
 
   filteredOptionsHOD: Observable<string[]> | undefined;
   filteredOptionsHR: Observable<string[]> | undefined;
@@ -204,23 +205,29 @@ export class InitiatorpageComponent implements OnInit {
   }
 
   completeTask(status: any){
-  
-    let textMSG= status == '0' ? "Task Rejected Successfully" : status == '1' ? "Task Approved Successfully" : "Task Resubmitted Successfully";
+      let textMSG= status == '0' ? "Task Rejected Successfully" : status == '1' ? "Task Approved Successfully" : "Task Resubmitted Successfully";
 
-  let params={
-    TASKID: this.taskId,
-    APPROVAL_DECISION:status,
-    APPROVAL_REMARKS :"hello srihari",
+      let params={
+        TASKID: this.taskId,
+        APPROVAL_DECISION:status,
+        APPROVAL_REMARKS :this.datavalidate(this.remarks),
+      }
+      this.service.ajax("CompleteCLOTPTask", this.namespace, params)
+      .then((res: any) => {
+        if (res.hasOwnProperty('tuple')) { 
+            this.toast.success(textMSG)
+            setTimeout(()=>{                   
+              this.router.navigate(['/inbox'])
+            }, 500);
+        }
+        })
   }
-  this.service.ajax("CompleteCLOTPTask", this.namespace, params)
-  .then((res: any) => {
-    if (res.hasOwnProperty('tuple')) { 
-        this.toast.success(textMSG)
-        setTimeout(()=>{                   
-          this.router.navigate(['/inbox'])
-        }, 500);
+  rejectTask(status: any){
+    if(this.datavalidate(this.remarks) =="" ){
+      status == '0' ? this.toast.error("Remarks mandatory for reject!") : this.remarks
+    }else{
+      this.completeTask(status);
     }
-    })
   }
 
   getloginUserDetails(): void {

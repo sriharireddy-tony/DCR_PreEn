@@ -20,7 +20,7 @@
             <div class="input-box">
                 <select class="form-select dIconHide" [(ngModel)]="search.resourceType" [ngModelOptions]="{standalone: true}" > 
                     <option value="">-- select --</option>
-                    <option *ngFor="let item1 of resTypeArr">{{item1}}</option>
+                    <option class="bg-light" *ngFor="let item1 of resTypeArr">{{item1}}</option>
                 </select>
                 <mat-icon class="searchicon" (click)="searchitems('resourceType')">search</mat-icon>                
               </div>
@@ -30,7 +30,7 @@
             <div class="input-box">
                 <select class="form-select dIconHide" [(ngModel)]="search.resourceDepartment" [ngModelOptions]="{standalone: true}"  > 
                     <option value="">-- select --</option>
-                    <option *ngFor="let item2 of resDeptArr">{{item2}}</option>
+                    <option class="bg-light" *ngFor="let item2 of resDeptArr">{{item2}}</option>
                 </select>
                 <mat-icon class="searchicon" (click)="searchitems('resourceDepartment')">search</mat-icon>                 
               </div>
@@ -58,8 +58,8 @@
         <div class="col-lg-3">
             <label class="form-label ">Status</label>
             <div class="input-box">
-                <select class="form-select" [(ngModel)]="search.status" [ngModelOptions]="{standalone: true}" id="dIconHide" > 
-                    
+                <select class="form-select dIconHide" [(ngModel)]="search.status" [ngModelOptions]="{standalone: true}"  > 
+                    <option class="bg-light" ></option>
                 </select>
                 <mat-icon class="searchicon" (click)="searchitems('status')">search</mat-icon>                 
               </div>

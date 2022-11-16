@@ -38,3 +38,6 @@
     top: 30px !important;
     right: 15px !important;
   }
+  .searchIconHide{
+    display: none;
+  }
