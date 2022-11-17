@@ -32,9 +32,11 @@ export class SearchComponent implements OnInit {
   show = false;
   totalLength: number = 0;
   page = 1;
-
+  
   resTypeArr: any =[]
   resDeptArr: any =[]
+  statusArray=['Saved','In Progress','Completed'];
+
   constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router,private dtpipe: DatePipe) {
     
    }
@@ -63,6 +65,7 @@ export class SearchComponent implements OnInit {
     this.searchData = [];
     this.totalLength = 0;
     this.flag = true;
+    let status = this.datavalidate(this.search.status) == "Saved" ? 0 : this.datavalidate(this.search.status) == "In Progress" ? 2 : this.datavalidate(this.search.status) == "Completed" ? 1 : null
 
     switch (item) {
       case 'requestNumber':
@@ -84,7 +87,7 @@ export class SearchComponent implements OnInit {
         this.datavalidate(this.search.toDate) == "" ? this.flag = false : this.param = { 'ToDate': this.dtpipe.transform(this.datavalidate(this.search.toDate), 'dd-MM-yy') }
         break;
       case 'status':
-        this.datavalidate(this.search.status) == "" ? this.flag = false : this.param = { 'Stage': this.datavalidate(this.search.status) }
+        status == null ? this.flag = false : this.param = { 'Stage': status }
         break;
       case 'selectAll':
         this.param = {
@@ -94,7 +97,7 @@ export class SearchComponent implements OnInit {
           'ResourceDepartment': this.datavalidate(this.search.resourceDepartment),
           'FromDate': this.dtpipe.transform(this.datavalidate(this.search.fromDate), 'dd-MM-yy'),
           'ToDate': this.dtpipe.transform(this.datavalidate(this.search.toDate), 'dd-MM-yy'),
-          'Stage': this.datavalidate(this.search.status)
+          'Stage': status
         }
         break;
       default:

@@ -1,3 +1,4 @@
+<div class="main">
 <form #searchForm="ngForm" >
     <div class="container-fluid mt-4 ">
     <div class="row">
@@ -59,7 +60,8 @@
             <label class="form-label ">Status</label>
             <div class="input-box">
                 <select class="form-select dIconHide" [(ngModel)]="search.status" [ngModelOptions]="{standalone: true}"  > 
-                    <option class="bg-light" ></option>
+                    <option value="">-- select --</option>
+                    <option class="bg-light" *ngFor="let item3 of statusArray">{{item3}}</option>
                 </select>
                 <mat-icon class="searchicon" (click)="searchitems('status')">search</mat-icon>                 
               </div>
@@ -91,6 +93,7 @@
                             <th>No of Resources</th>
                             <th>Period From</th>
                             <th>Period To</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody *ngIf=" searchData.length > 0; else noData">
@@ -103,6 +106,7 @@
                             <td>{{item.NOOFRESOURCES}}</td>
                             <td>{{item.PERIODFROM}}</td>
                             <td>{{item.PERIODTO}}</td>
+                            <td>{{item.STATUS == 0 ? 'Saved' : item.STATUS == 2 ? 'In Progress' : item.STATUS == 1 ? 'Completed' : "" }}</td>
                         </tr>
                     </tbody>
                     <ng-template #noData>
@@ -118,4 +122,5 @@
     <div *ngIf="totalLength > 0">
     <pagination-controls class="pagination" (pageChange)="handlePageChange($event)"></pagination-controls>
     </div>
+</div>
 </div>
