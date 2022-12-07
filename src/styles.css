@@ -7,3 +7,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .dIconHide{
     background-image: none !important;
 }
+.mat-datepicker-content .mat-calendar {
+    width: 213px !important;
+    height: 280px !important;
+  }

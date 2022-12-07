@@ -22,11 +22,11 @@ export class SearchComponent implements OnInit {
 
   requestNumber: string | undefined;
   requestName: string | undefined;
-  resourceType: string | undefined;
-  resourceDepartment: string | undefined;
+  resourceType: string ="";
+  resourceDepartment: string ="";
   fromDate: string | undefined;
   toDate: string | undefined;
-  status: string | undefined;
+  status: string ="";
 
   searchData: any = [];
   show = false;
@@ -35,7 +35,7 @@ export class SearchComponent implements OnInit {
   
   resTypeArr: any =[]
   resDeptArr: any =[]
-  statusArray=['Saved','In Progress','Completed'];
+  statusArray=['In Progress','Completed'];
 
   constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router,private dtpipe: DatePipe) {
     
@@ -66,7 +66,6 @@ export class SearchComponent implements OnInit {
     this.totalLength = 0;
     this.flag = true;
     let status = this.datavalidate(this.search.status) == "Saved" ? 0 : this.datavalidate(this.search.status) == "In Progress" ? 2 : this.datavalidate(this.search.status) == "Completed" ? 1 : null
-
     switch (item) {
       case 'requestNumber':
         this.datavalidate(this.search.requestNumber) == "" ? this.flag = false : this.param = { 'RequestNumber': this.datavalidate(this.search.requestNumber) }
@@ -89,6 +88,9 @@ export class SearchComponent implements OnInit {
       case 'status':
         status == null ? this.flag = false : this.param = { 'Stage': status }
         break;
+        case 'Saved':
+        this.param = { 'Stage': 0 }
+          break;
       case 'selectAll':
         this.param = {
           'RequestNumber': this.datavalidate(this.search.requestNumber),
@@ -107,7 +109,7 @@ export class SearchComponent implements OnInit {
       this.service.ajax("SearchCLOTPDetails", this.namespace, this.param)
         .then((ajaxResponse: any) => {
           if (ajaxResponse.hasOwnProperty('tuple')) {
-            this.searchData = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'CLOTP_DETAILS');
+            this.searchData = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'PRM_USER_MASTER');
             this.totalLength = this.searchData.length;
           }
           this.show = this.totalLength == 0 ? true : false;

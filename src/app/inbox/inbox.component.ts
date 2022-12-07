@@ -16,13 +16,20 @@ export class InboxComponent implements OnInit {
   inboxData:any =[];
   searchData: any =[];
   show = false;
+  loginUserRoles: string = "";
+  loggedInUser: string =""
    totalLength: number= 0;
    page = 1;
 
-  constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router) { }
+  constructor(private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private router: Router) {
+    // this.convtojson.userId.subscribe ((val1 : any)  =>{
+    //   this.loggedInUser = val1;
+    // })
+    this.loggedInUser= JSON.parse(localStorage.getItem('userLoginId')!);
+   }
 
   ngOnInit(): void {
-   this.loadInboxDetails();
+    this.getRoles();
   }
 
   
@@ -32,20 +39,38 @@ export class InboxComponent implements OnInit {
 
 
 loadInboxDetails(){
-
     this.searchData =[];
     this.totalLength= 0;
 
-let param = {}
-
+let param = {
+  'userId': this.loggedInUser,
+  "loginUserRoles": this.loginUserRoles
+}
       this.service.ajax("GetInboxTaskDetails", "http://schemas.cordys.com/clotp_metadata", param).
        then((ajaxResponse: any) => {
         if (ajaxResponse.hasOwnProperty('tuple')) {
-          this.inboxData = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'CLOTP_DETAILS');
+          this.inboxData = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'PRM_USER_MASTER');
           this.totalLength=  this.inboxData.length;
         }
         this.show =  this.totalLength==0 ? true : false;
+      })
+}
 
+getRoles(){
+  let Roles: any[] = [];
+  let param = {
+    'userId': this.loggedInUser,
+  }
+  this.service.ajax("GetClotpRolesByUserId", "http://schemas.cordys.com/clotp_metadata", param).
+       then((res: any) => {
+        if (res.hasOwnProperty('tuple')) {
+          let roles = this.convtojson.convertTupleToJson(res.tuple, 'PROJECT_TEAM');
+          roles.filter((item: any) =>{
+            Roles.push(item.UM_USER_ROLE)
+            this.loginUserRoles = Roles.toString();
+          })
+          this.loadInboxDetails();
+        }
       })
 }
 

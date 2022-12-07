@@ -20,7 +20,7 @@
                             <input class="form-control" type="text" formControlName="requestordepartment">
                         </div>
                         <div class="col-lg-3">
-                            <label class="form-label required">Resource Type</label>
+                            <label class="form-label" >Resource Type<span class="required" *ngIf="savedStatus=='0'">*</span></label>
                             <select formControlName="resourcetype" class="form-select"
                                 [ngClass]="{'boxborderred': submitted && resourcetype?.invalid ,'dIconHide': !submitBtnHide}"
                                 (change)="res_typeChange(sel.value)"  #sel>
@@ -36,7 +36,7 @@
 
                     <div class="row mt-3">
                         <div class="col-lg-3">
-                            <label class="form-label required">Project</label>
+                            <label class="form-label ">Project<span class="required" *ngIf="savedStatus=='0'">*</span></label>
                             <select formControlName="project" class="form-select"
                                 [ngClass]="{'boxborderred': submitted && project?.invalid, 'dIconHide': !submitBtnHide}">
                                 <option value="">-- select --</option>
@@ -44,40 +44,39 @@
                             </select>
                         </div>
                         <div class="col-lg-3">
-                            <label class="form-label required">No of Resources</label>
+                            <label class="form-label ">No of Resources<span class="required" *ngIf="savedStatus=='0'">*</span></label>
                             <input class="form-control" type="number" formControlName="noofresources"
                                 [ngClass]="{'boxborderred': submitted && noofresources?.invalid}">
                         </div>
                         <div class="col-lg-3">
-                            <label class="form-label required">Resource Department</label>
-                            <select class="form-select" formControlName="resourcedepartment"
-                                [ngClass]="{'boxborderred': submitted && resourcedepartment?.invalid, 'dIconHide': !submitBtnHide}">
-                                <option value="">-- select --</option>
-                                <option *ngFor="let item3 of ResourceDeptDropdown" [ngValue]="item3">{{item3}}</option>
-                            </select>
+                           
+                            <label class="form-label">Resource Department<span class="required" *ngIf="savedStatus=='0'">*</span></label>
+
+                            <select formControlName="resourcedepartment" class="form-select"
+                            [ngClass]="{'boxborderred': submitted && resourcedepartment?.invalid, 'dIconHide': !submitBtnHide}">
+                            <option value="">-- select --</option>
+                            <option *ngFor="let item2 of ResourceDeptDropdown" [ngValue]="item2">{{item2}}</option>
+                        </select>
+
                         </div>
                         <div class="col-lg-3 input-box">
-                            <label class="form-label required">Period From</label>
+                            <label class="form-label">Period From<span class="required" *ngIf="savedStatus=='0'">*</span></label>
                             <input matInput [matDatepicker]="picker1" class="form-control" formControlName="periodfrom" [ngClass]="{'boxborderred': submitted && periodfrom?.invalid}">
                             <mat-datepicker-toggle matSuffix [for]="picker1" id="datepickIcon"></mat-datepicker-toggle>
                             <mat-datepicker #picker1></mat-datepicker>
-                            <!-- <input class="form-control" type="date" formControlName="periodfrom" 
-                               placeholder="-- Select --" [ngClass]="{'boxborderred': submitted && periodfrom?.invalid}">
-                               <mat-icon class="datepickericon">date_range</mat-icon> -->
+                    
                         </div>
                     </div>
                     <div class="row mt-3 ">
                         <div class="col-lg-3 input-box">
-                            <label class="form-label required">Period To</label>
+                            <label class="form-label">Period To<span class="required" *ngIf="savedStatus=='0'">*</span></label>
                             <input matInput [matDatepicker]="picker2" class="form-control" formControlName="periodto" [ngClass]="{'boxborderred': submitted && periodto?.invalid}">
                             <mat-datepicker-toggle matSuffix [for]="picker2" id="datepickIcon"></mat-datepicker-toggle>
                             <mat-datepicker #picker2></mat-datepicker>
-                            <!-- <input class="form-control" type="date" formControlName="periodto"
-                            placeholder="-- Select --" [ngClass]="{'boxborderred': submitted && periodto?.invalid}">
-                            <mat-icon class="datepickericon">date_range</mat-icon> -->
+                           
                         </div>
                         <div class="col-lg-6">
-                            <label class="form-label required">Justification</label>
+                            <label class="form-label">Justification<span class="required" *ngIf="savedStatus=='0'">*</span></label>
                             <input class="form-control" type="text" formControlName="justifiaction"
                             [ngClass]="{'boxborderred': submitted && justifiaction?.invalid}">
                         </div>
@@ -103,7 +102,7 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr class="bg-secondary text-white" >
-                                    <th><input type="checkbox" [checked]="isAllCheckBoxChecked() && thChecked"
+                                    <th><input type="checkbox" [checked]="isAllCheckBoxChecked() && docData.filesArray.length>0"
                                             (change)="checkAllCheckBox($event)"></th>
                                     <th>Document Name</th>
                                     <th>Uploaded By</th>
@@ -112,10 +111,10 @@
 
                             </thead>
                             <tbody>
-                                <tr *ngFor="let item of docData.filesArray; let i=index;" disabled>
-                                    <td><input type="checkbox" value="{{item.DOC_NAME}}" (change)="tdCheckbox()"
+                                <tr *ngFor="let item of docData.filesArray; let i=index;">
+                                    <td><input type="checkbox" value="{{item.DOC_NAME}}" (change)="tdCheckbox(item)"
                                             [(ngModel)]="item.isChecked" [ngModelOptions]="{standalone: true}"></td>
-                                    <td>{{ item.DOC_NAME }}</td>
+                                    <td style="cursor:pointer;text-decoration: underline;"><a (click)="downloadFile(item)">{{ item.DOC_NAME }}</a></td>
                                     <td>{{ item.UPLOADED_BY }}</td>
                                     <td>{{ item.UPLOADED_ON }}</td>
                                 </tr>
@@ -144,11 +143,11 @@
 <div class="container-fluid mt-3">
     <div class="row" *ngIf="res_type_selected !== 'show'">
         <div class="col-lg-3">
-            <label class="form-label required">Department HOD</label>
+            <label class="form-label">Department HOD<span class="required" *ngIf="savedStatus=='0'">*</span></label>
             <div class="input-box rounded">
-                <input type="text" class="form-control rounded-left" placeholder="Search"
-                formControlName="HODControl" [matAutocomplete]="autoHOD" [ngClass]="{'boxborderred': submitted && HODControl?.invalid}"/>
-                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
+                <input type="search" class="form-control rounded-left" placeholder="Search"
+                formControlName="HODControl" [matAutocomplete]="autoHOD" #hod [ngClass]="{'boxborderred': submitted && HODControl?.invalid}"/>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide || this.requestdetailform.controls['HODControl'].value}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoHOD="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsHOD | async" [value]="option">
                       {{option}}
@@ -158,12 +157,12 @@
             
         </div>
         <div class="col-lg-3"
-            [hidden]="res_type_selected == 'Casual Labour-Dept' || res_type_selected == 'Casual Labour-Project'">
-            <label class="form-label required">HR</label>
+            [hidden]="res_type_selected == 'Casual Labour-Dept' || res_type_selected == 'Casual Labour-Project'|| res_type_selected == 'Project OTP'">
+            <label class="form-label">HR<span class="required" *ngIf="savedStatus=='0'">*</span></label>
             <div class="input-box rounded">
-                <input type="text" class="form-control rounded-left" placeholder="Search"
+                <input type="search" class="form-control rounded-left" placeholder="Search"
                 formControlName="HRControl" [matAutocomplete]="autoHR" [ngClass]="{'boxborderred': submitted && HRControl?.invalid}"/>
-                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide || this.requestdetailform.controls['HRControl'].value}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoHR="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsHR | async" [value]="option">
                         {{option}}
@@ -172,12 +171,12 @@
             </div>
         </div>
         <div class="col-lg-3"
-            [hidden]="res_type_selected == 'Resource week OTP' || res_type_selected == 'Project OTP' || res_type_selected == 'Casual Labour-Dept'">
-            <label class="form-label required">CPH</label>
+            [hidden]="res_type_selected == 'Resource week OTP'  || res_type_selected == 'Casual Labour-Dept'">
+            <label class="form-label">CPH<span class="required" *ngIf="savedStatus=='0'">*</span></label>
             <div class="input-box rounded">
-                <input type="text" class="form-control rounded-left" placeholder="Search"
+                <input type="search" class="form-control rounded-left" placeholder="Search" 
                 formControlName="CPHControl" [matAutocomplete]="autoCPH" [ngClass]="{'boxborderred': submitted && CPHControl?.invalid}"/>
-                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide || this.requestdetailform.controls['CPHControl'].value}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoCPH="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsCPH | async" [value]="option">
                         {{option}}
@@ -186,11 +185,11 @@
             </div>
         </div>
         <div class="col-lg-3" [hidden]="res_type_selected == 'Resource week OTP'">
-            <label class="form-label required">FDPD Head</label>
+            <label class="form-label">FDPD Head<span class="required" *ngIf="savedStatus=='0'">*</span></label>
             <div class="input-box rounded">
-                <input type="text" class="form-control rounded-left" placeholder="Search"
+                <input type="search" class="form-control rounded-left" placeholder="Search"
                 formControlName="FDPDControl" [matAutocomplete]="autoFDPD" [ngClass]="{'boxborderred': submitted && FDPDControl?.invalid}"/>
-                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide}">search</mat-icon>
+                <mat-icon class="searchicon" [ngClass]="{'searchIconHide': !submitBtnHide || this.requestdetailform.controls['FDPDControl'].value}">search</mat-icon>
                 <mat-autocomplete autoActiveFirstOption #autoFDPD="matAutocomplete">
                     <mat-option *ngFor="let option of filteredOptionsFDPD | async" [value]="option">
                         {{option}}
@@ -213,21 +212,21 @@
             </mat-expansion-panel-header>
             <div class="col-lg-12 mt-4">
                 <div class="row">
-                    <div class="container">
-                        <table class="table table-bordered">
+                    <div class="container aahtable">
+                        <table class="table table-bordered ">
                             <thead>
                                 <tr class="bg-secondary text-white">
-                                    <th>Role</th>
-                                    <th>User Name</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th style="width:45%">Remarks</th>
+                                    <th >Role</th>
+                                    <th >User Name</th>
+                                    <th >Status</th>
+                                    <th >Date</th>
+                                    <th >Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr *ngFor="let item of CLOTPAAHArr; let i=index;">
-                                    <td>{{item.AAH_ACTROLE}}</td>
-                                    <td>{{item.AAH_ACTOWNERID}}</td>
+                                    <td >{{item.AAH_ACTROLE}}</td>
+                                    <td >{{item.AAH_ACTOWNERID}}</td>
                                     <td>{{item.AAH_ACTSTATUS}}</td>
                                     <td>{{item.AAH_ACTSTARTDATE | date: 'dd-MM-yyyy'}}</td>
                                     <td>{{ item.AAH_ACTREMARKS}}</td>
@@ -245,12 +244,12 @@
         <div class="col-lg-6" >
             <div *ngIf="!submitBtnHide">
             <label class="form-label">Remarks</label>
-            <input class="form-control" type="text" [(ngModel)]="remarks" [ngModelOptions]="{standalone: true}">
+            <input class="form-control" type="text" [(ngModel)]="remarks" [ngClass]="{'boxborderred': rejectSubmitted && remarks == ''}" [ngModelOptions]="{standalone: true}">
         </div>
         </div>
 <div class="col-lg-6" style="margin-top:3%;">
     <div *ngIf="submitBtnHide">
-    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="save()">
+    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="save('save')">
         <mat-icon class="text-red">save</mat-icon>Save
     </button>
     <button type="button" class="btn btn-sm btn-danger mx-2" (click)="submit()">
@@ -258,10 +257,10 @@
     </button>
 </div>
 <div *ngIf="!submitBtnHide">
-    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="rejectTask('0')">
+    <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="submitTask('0')">
         <mat-icon class="text-red">close</mat-icon>Reject
     </button>
-    <button type="button" class="btn btn-sm btn-danger mx-2" (click)="completeTask('1')">
+    <button type="button" class="btn btn-sm btn-danger mx-2" (click)="submitTask('1')">
         <mat-icon class="text-red">done</mat-icon>Approve
     </button>
 </div>

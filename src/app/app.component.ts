@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { environment } from './services/soapcall.service';
+import { environment, SOAPCallService } from './services/soapcall.service';
+import { AppObjects} from './appObjects'
+import { CommonServicesService } from './services/common-services.service';
+
 declare var $: any, _: any;
 
 @Component({
@@ -9,52 +12,43 @@ declare var $: any, _: any;
 })
 export class AppComponent implements OnInit{
   title = 'clotp';
+
+  userDetailsInput: any = { dn: "" }
+  userDetails = {
+    userName: '',
+    displayName: ''
+  };
+
+  constructor( private appobject: AppObjects, private service: SOAPCallService, private convtojson: CommonServicesService){}
   
 ngOnInit(): void{
 
   this.login();
+  // this.getDetails();
 }
 
+
 login(){
-    
-  
-    $.cordys.authentication.sso.authenticate("srihari","srihari").done( (res: any) => {
-  
-      if(environment.production == false){
-  
-          if (document.cookie != "") {
-  
-          localStorage['token'] = $.cordys.getCookie("defaultinst_SAMLart");
-  
-          this.deleteAllCookies();
+  if($.cordys.authentication.sso.isAuthenticated()){    
+}
+else{
+  $.cordys.authentication.sso.authenticate("srihari","srihari").done( function () {
+});
+}  
+}
 
-          //this.getloginUserDetails();
-         
-          // alert("Login Successfull");
-          // this.router.navigate(['/home']);
-          
-      }
-    }
-  });
-  
-  }
+// getDetails(){
+//   this.service.ajax("GetUserDetails", 'http://schemas.cordys.com/1.0/ldap', this.userDetailsInput).then((ajaxResponse: any) => {
+//     if (ajaxResponse.hasOwnProperty('tuple')) {
+//       let data = this.convtojson.convertTupleToJson(ajaxResponse.tuple, 'GetUserDetailsResponse');
+//       this.userDetails.userName = ajaxResponse.tuple.old.user.authuserdn.substring(3, ajaxResponse.tuple.old.user.authuserdn.indexOf(","))
+//       this.userDetails.displayName = ajaxResponse.tuple.old.user.description;
+//       this.appobject.LoggedInUser = ({'userName': this.userDetails.userName, 'displayName': this.userDetails.displayName})
+//     }
+//     localStorage.setItem('userAuthData', JSON.stringify(this.userDetails));
+//   }, (err) => {
 
-  deleteAllCookies() {
-
-    var cookies = document.cookie.split(";");
-  
-    for (var i = 0; i < cookies.length; i++) {
-  
-        var cookie = cookies[i];
-  
-        var eqPos = cookie.indexOf("=");
-  
-        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-  
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-  
-    }
-  
-  }
+//   });
+// }
 
 }

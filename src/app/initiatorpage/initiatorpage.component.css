@@ -3,8 +3,7 @@
     padding: 5px;
     border-radius: 2px;
 }
-.form-label.required::after{
-    content:"*";
+.required{
     color: red;
     font-size:18px;
 }
@@ -45,4 +44,13 @@
     padding-left: 4%;
     padding-right: 4%;
 }
-  
+thead{
+  position: sticky;
+  top: 0px;
+  z-index: 999;
+}
+
+.aahtable{
+  height: 40vh;
+  overflow: scroll;
+}

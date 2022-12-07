@@ -16,7 +16,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { ToastrModule } from 'ngx-toastr';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { DatePipe } from '@angular/common';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -49,7 +49,7 @@ import { MatNativeDateModule } from '@angular/material/core';
   exports:[
     MatNativeDateModule,
   ],
-  providers: [DatePipe,MatNativeDateModule],
+  providers: [DatePipe, {provide:MAT_DATE_LOCALE, useValue:'en-GB'}],
   bootstrap: [AppComponent]
 })
 export class AppModule { 

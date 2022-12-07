@@ -49,4 +49,10 @@ resTypeArr(data: any[]){
   resDeptArr(data: any[]){
     this.var2.next(data);
   }
+
+  userId = new BehaviorSubject<any>([]);
+
+userIdFun(data: string){
+    this.userId.next(data);
+  }
 }

@@ -6,6 +6,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatSortModule} from '@angular/material/sort';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatSelectModule} from '@angular/material/select';
 
 @NgModule({
   declarations: [],
@@ -16,7 +17,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
     MatIconModule,
     MatSortModule,
     MatAutocompleteModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatSelectModule
   ],
   exports: [
     MatTabsModule,
@@ -24,7 +26,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
     MatIconModule,
     MatSortModule,
     MatAutocompleteModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatSelectModule
   ]
 })
 export class AngMaterialModule {}
