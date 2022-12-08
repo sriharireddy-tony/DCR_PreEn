@@ -12,5 +12,6 @@ export class AppObjects {
    // changeRelated:Array<DCR_EN_LOV_MASTER_AUTO> =[] ;
 
    LoggedInUser: any = { userName:"", displayName: "" };
+
  
 }

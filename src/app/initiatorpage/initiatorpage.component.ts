@@ -8,7 +8,7 @@ import { CommonServicesService } from '../services/common-services.service';
 import { SOAPCallService } from '../services/soapcall.service';
 import { ActivatedRoute, Router } from '@angular/router'
 import Swal from 'sweetalert2';
-import { AppObjects} from '../appObjects'
+import { AppObjects } from '../appObjects'
 
 declare var $: any, _: any;
 
@@ -22,19 +22,21 @@ export class InitiatorpageComponent implements OnInit {
   documentpanel = false;
 
   namespace: string = "http://schemas.cordys.com/clotp_metadata";
-  taskId: string ="";
-  openAs: string ="";
+  taskId: string = "";
+  openAs: string = "";
   submitted = false;
   rejectSubmitted = false;
   submitBtnHide = true;
+  viewPage = true;
   res_type_selected: string = "show"
   savedStatus: string = 'save';
-  title: string ="";
+  isValid: boolean = true;
   fileUploadDoc: any;
   ResourceTypeDropdown: any = [];
   ResourceDeptDropdown: any = [];
   ResourceDeptNameDropdown: any = [];
   CLOTP_Number: number | undefined;
+  REQUEST_NUMBER: number | undefined;
   userDetailsInput: any = { dn: "" }
   userDetails = {
     userName: '',
@@ -45,7 +47,8 @@ export class InitiatorpageComponent implements OnInit {
   HRUsersArr: any = [];
   CPHUsersArr: any = [];
   FDPDUsersArr: any = [];
-  remarks: string ="";
+  remarks: string = "";
+  todayDate: Date = new Date();
 
   filteredOptionsHOD: any;
   filteredOptionsHR: any;
@@ -60,13 +63,13 @@ export class InitiatorpageComponent implements OnInit {
 
   CLOTPDetailsObj: any = [];
   CLOTPDocArr: any = [];
-  CLOTPAAHArr: any =[];
+  CLOTPAAHArr: any = [];
 
   TaskDetails: any;
-  approvalStage: string ="";
+  approvalStage: string = "";
   approvalRole: string | undefined;
 
-  public filterHOD(value: any): string[] { 
+  public filterHOD(value: any): string[] {
 
     const filterValue = value.toLowerCase();
     return this.HODUsersArr.filter((option: string) => option.toLowerCase().includes(filterValue));
@@ -90,10 +93,10 @@ export class InitiatorpageComponent implements OnInit {
 
 
   constructor(private fb: FormBuilder, private service: SOAPCallService, private convtojson: CommonServicesService, private toast: ToastrService, private dtpipe: DatePipe,
-    private activatedRoute: ActivatedRoute, private router: Router, private appObject:AppObjects ) {
+    private activatedRoute: ActivatedRoute, private router: Router, private appObject: AppObjects) {
 
     this.docData.filesArray = [];
-    this.getLovDetails();   
+    this.getLovDetails();
     this.getloginUserDetails();
 
   }
@@ -101,7 +104,7 @@ export class InitiatorpageComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges): void {
 
-    
+
   }
   ngOnInit(): void {
     // this.userDetails.userName=this.appObject.LoggedInUser.userName
@@ -131,6 +134,17 @@ export class InitiatorpageComponent implements OnInit {
     this.activatedRoute.queryParams.subscribe((params: any) => {
       this.taskId = params.taskId;
       this.CLOTP_Number = params.CLOTP_NO;
+      let page =params.page;
+      if(page == "viewPage"){
+        this.viewPage = false;
+this.submitBtnHide = false;
+this.requestdetailform.disable()
+      }
+      if(page == "savePage"){
+        this.viewPage = true;
+this.submitBtnHide = true;
+this.requestdetailform.controls['resourcetype'].disable();
+      }
       if (this.datavalidate(this.taskId) != "") {
         $.cordys.json.defaults.removeNamespacePrefix = true;
 
@@ -150,18 +164,18 @@ export class InitiatorpageComponent implements OnInit {
             this.approvalStage = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVAL_STAGE;
             this.approvalRole = this.TaskDetails.applicationData[0].CLOTP_IP_SCHEMAFRAGMENT.APPROVER_ROLE;
 
-            if(this.approvalStage == "2"||this.approvalStage == "3"||this.approvalStage == "4"||this.approvalStage == "5"||this.approvalStage == "6"){
+            if (this.approvalStage == "2" || this.approvalStage == "3" || this.approvalStage == "4" || this.approvalStage == "5" || this.approvalStage == "6") {
               this.submitBtnHide = false;
               this.requestdetailform.disable()
             }
-           this.getDetails();
+            this.getDetails();
           })
-        }
-          this.getDetails();
+      }
+      this.getDetails();
     })
   }
 
-  getDetails(){
+  getDetails() {
     let param1 = {
       'CLOTP_NO': this.CLOTP_Number,
     };
@@ -184,8 +198,14 @@ export class InitiatorpageComponent implements OnInit {
             CPHControl: this.CLOTPDetailsObj[0].CPH + " - " + this.PRMUserData[0].UM_FULLNAME,
             FDPDControl: this.CLOTPDetailsObj[0].FDPDHEAD + " - " + this.PRMUserData[0].UM_FULLNAME,
           })
-          this.res_typeChange(this.CLOTPDetailsObj[0].RESOURCETYPE);
+          this.res_typeChange(this.CLOTPDetailsObj[0].RESOURCETYPE == null ? [] : this.CLOTPDetailsObj[0].RESOURCETYPE);
         }
+// if(this.savedStatus == '1' || this.savedStatus == '2'){
+// this.viewPage = false;
+// this.submitBtnHide = false;
+// this.requestdetailform.disable()
+// }
+
       })
 
     let param2 = {
@@ -198,35 +218,35 @@ export class InitiatorpageComponent implements OnInit {
           this.docData.filesArray = [...this.CLOTPDocArr]
         }
       })
-      let param3 = {
-        'APP_REFNO': this.CLOTP_Number,
-      };
-      this.service.ajax("GetCLOTPAAHDetails", this.namespace, param3).
-        then((CLOTPAAHResponse: any) => {
-          if (CLOTPAAHResponse.hasOwnProperty('tuple')) {
-            this.CLOTPAAHArr = this.convtojson.convertTupleToJson(CLOTPAAHResponse.tuple, 'CLOTP_AUTO_APPROVAL_HISTORY');
-          }
-        })
+    let param3 = {
+      'APP_REFNO': this.CLOTP_Number,
+    };
+    this.service.ajax("GetCLOTPAAHDetails", this.namespace, param3).
+      then((CLOTPAAHResponse: any) => {
+        if (CLOTPAAHResponse.hasOwnProperty('tuple')) {
+          this.CLOTPAAHArr = this.convtojson.convertTupleToJson(CLOTPAAHResponse.tuple, 'CLOTP_AUTO_APPROVAL_HISTORY');
+        }
+      })
 
   }
 
-  submitTask(status:string){
+  submitTask(status: string) {
 
     let data = {
       "CLOTP_OP_SCHEMAFRAGMENT":
       {
-        APPROVER_DECISSION:status,
-        REMARKS: this.datavalidate(this.remarks),	
-        APPROVED_BY : this.userDetails.userName
+        APPROVER_DECISSION: status,
+        REMARKS: this.datavalidate(this.remarks),
+        APPROVED_BY: this.userDetails.userName
       }
     };
-    if(status == "0"){
+    if (status == "0") {
       this.rejectSubmitted = true;
-      this.datavalidate(this.remarks) !="" ? this.completeTask(this.taskId,data,status,this.openAs) : Swal.fire('','Please enter the Remarks!','warning');
-  }
-  else{
-    this.completeTask(this.taskId,data,status,this.openAs);
-  }
+      this.datavalidate(this.remarks) != "" ? this.completeTask(this.taskId, data, status, this.openAs) : Swal.fire('', 'Please enter the Remarks!', 'warning');
+    }
+    else {
+      this.completeTask(this.taskId, data, status, this.openAs);
+    }
   }
 
 
@@ -349,20 +369,25 @@ export class InitiatorpageComponent implements OnInit {
 
   save(val: string) {
     let dataObj = {};
-    this.requestdetailform.resourcetype.setValidators(null);
-    this.requestdetailform.project.setValidators(null);
-    this.requestdetailform.NOOFRESOURCES.setValidators(null);
-    this.requestdetailform.RESOURCEDEPARTMENT.setValidators(null);
-    this.requestdetailform.PERIODFROM.setValidators(null);
-    this.requestdetailform.PERIODTO.setValidators(null);
-    this.requestdetailform.JUSTIFICATION.setValidators(null);
-    this.requestdetailform.DEPARTMENTHOD.setValidators(null);
-    this.requestdetailform.HR.setValidators(null);
-    this.requestdetailform.CPH.setValidators(null);
-    this.requestdetailform.FDPDHEAD.setValidators(null);
-    if (this.requestdetailform.valid) {
+    if(val == 'save'){
+    this.project.setValidators(null);
+    this.noofresources.setValidators(null);
+    this.resourcedepartment.setValidators(null);
+    this.periodfrom.setValidators(null);
+    this.periodto.setValidators(null);
+    this.justifiaction.setValidators(null);
+    this.HODControl.setValidators(null);
+    this.HRControl.setValidators(null);
+    this.CPHControl.setValidators(null);
+    this.FDPDControl.setValidators(null);
+    this.submitted = false;
+    }
+    if(new Date(this.requestdetailform.controls['periodto'].value) < new Date(this.requestdetailform.controls['periodfrom'].value)){
+      return Swal.fire('ToDate not greater than FromDate', "", 'warning');
+    }
+    this.isValid = val == 'submit' ? this.requestdetailform.valid : this.requestdetailform.controls['resourcetype'].value
+    if (this.isValid) {
       if (this.CLOTP_Number != 0 && this.CLOTP_Number != undefined) {
-
         dataObj = {
           tuple: {
             old: {
@@ -379,8 +404,8 @@ export class InitiatorpageComponent implements OnInit {
                 "PROJECT": (this.requestdetailform.controls['project'].value ? this.requestdetailform.controls['project'].value : ""),
                 "NOOFRESOURCES": (this.requestdetailform.controls['noofresources'].value ? this.requestdetailform.controls['noofresources'].value : ""),
                 "RESOURCEDEPARTMENT": (this.requestdetailform.controls['resourcedepartment'].value ? this.requestdetailform.controls['resourcedepartment'].value : ""),
-                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""),'yyyy-MM-dd'),
-                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""),'yyyy-MM-dd'),
+                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""), 'yyyy-MM-dd'),
+                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""), 'yyyy-MM-dd'),
                 "JUSTIFICATION": (this.requestdetailform.controls['justifiaction'].value ? this.requestdetailform.controls['justifiaction'].value : ""),
                 "DEPARTMENTHOD": this.datavalidate(this.requestdetailform.controls['HODControl'].value).split(" ")[0],
                 "HR": this.datavalidate(this.requestdetailform.controls['HRControl'].value).split(" ")[0],
@@ -404,8 +429,8 @@ export class InitiatorpageComponent implements OnInit {
                 "PROJECT": (this.requestdetailform.controls['project'].value ? this.requestdetailform.controls['project'].value : ""),
                 "NOOFRESOURCES": (this.requestdetailform.controls['noofresources'].value ? this.requestdetailform.controls['noofresources'].value : ""),
                 "RESOURCEDEPARTMENT": (this.requestdetailform.controls['resourcedepartment'].value ? this.requestdetailform.controls['resourcedepartment'].value : ""),
-                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""),'yyyy-MM-dd'),
-                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""),'yyyy-MM-dd'),
+                "PERIODFROM": this.dtpipe.transform((this.requestdetailform.controls['periodfrom'].value ? this.requestdetailform.controls['periodfrom'].value : ""), 'yyyy-MM-dd'),
+                "PERIODTO": this.dtpipe.transform((this.requestdetailform.controls['periodto'].value ? this.requestdetailform.controls['periodto'].value : ""), 'yyyy-MM-dd'),
                 "JUSTIFICATION": (this.requestdetailform.controls['justifiaction'].value ? this.requestdetailform.controls['justifiaction'].value : ""),
                 "DEPARTMENTHOD": this.datavalidate(this.requestdetailform.controls['HODControl'].value).split(" ")[0],
                 "HR": this.datavalidate(this.requestdetailform.controls['HRControl'].value).split(" ")[0],
@@ -421,8 +446,9 @@ export class InitiatorpageComponent implements OnInit {
         .then((res: any) => {
           if (res.hasOwnProperty('tuple')) {
             this.CLOTP_Number = res.tuple.new.CLOTP_DETAILS.CLOTP_NO
+            this.REQUEST_NUMBER = res.tuple.new.CLOTP_DETAILS.REQUEST_NUMBER
             this.saveDocuments();
-            this.title= "Data saved Succesfully";
+            val == 'save' ? Swal.fire(`CL/OTP Request saved Successfully: ${this.REQUEST_NUMBER}`, "", 'success') : ""
             if (val == 'submit') {
               Swal.fire({
                 title: 'Are you sure to submit?',
@@ -434,47 +460,47 @@ export class InitiatorpageComponent implements OnInit {
                 confirmButtonText: 'Yes',
               }).then((result) => {
                 if (result.value) {
-            if (this.CLOTP_Number != null && this.CLOTP_Number != undefined) {
-              let param = {
-                'CLOTP_NO': this.CLOTP_Number
-              };
-        if(this.approvalStage == ""){
-          this.service.ajax("CLOTP_BPM", "http://schemas.cordys.com/default", param).
-          then((ajaxResponse: any) => {
-            if (ajaxResponse.data.instance_id != "") {
-              this.title= "Data Submitted Succesfully";
-              Swal.fire({
-                title: this.title,
-                icon: 'success',
-                allowOutsideClick: false
-              }).then (() => {
-                window.location.reload();
-                this.router.navigate(['/inbox'])
-                })
+                  if (this.CLOTP_Number != null && this.CLOTP_Number != undefined) {
+                    let param = {
+                      'CLOTP_NO': this.CLOTP_Number
+                    };
+                    if (this.approvalStage == "") {
+                      this.service.ajax("CLOTP_BPM", "http://schemas.cordys.com/default", param).
+                        then((ajaxResponse: any) => {
+                          if (ajaxResponse.data.instance_id != "") {
+                            Swal.fire({
+                              title: `CL/OTP Request submitted Successfully: ${this.REQUEST_NUMBER}`,
+                              icon: 'success',
+                              allowOutsideClick: false
+                            }).then(() => {
+                              window.location.reload();
+                              this.router.navigate(['/inbox'])
+                            })
+                          }
+                        })
+                    }
+                  }
+                }
+              })
             }
-          })
-        }
-      }
-    }
-  })
-    }
           }
         },
           (err) => {
 
           })
     }
-    else{
-      Swal.fire('','Please enter the all mandatory fields!','error')
+    else {
+     
+      Swal.fire('Please enter all the mandatory fields!', '', 'error')
     }
   }
 
   submit() {
     this.submitted = true;
     this.save('submit');
-}
-     
-  
+  }
+
+
 
 
   projectTeamRolesList() {
@@ -506,7 +532,7 @@ export class InitiatorpageComponent implements OnInit {
   }
 
   res_typeChange(e: any) {
-    if (e.includes("Resource week OTP")){
+    if (e.includes("Resource week OTP")) {
       this.res_type_selected = "Resource week OTP"
       this.CPHControl.setValidators(null);
       this.FDPDControl.setValidators(null);
@@ -539,15 +565,15 @@ export class InitiatorpageComponent implements OnInit {
     this.fileName = this.file[0].name;
 
     if (this.file == "" || this.file == null || this.file == undefined) {
-      this.toast.warning("Please Select Any File");
+      Swal.fire('Please Select Any File!', '', 'warning')
       return false;
     }
     else if (this.fileName.lastIndexOf(".") == -1) {
-      this.toast.info("File Format Not Recognized. Please Select Different File");
+      Swal.fire('File Format Not Recognized. Please Select Different File!', '', 'warning')
       return false;
     }
     else if (this.fileName.indexOf("@") > -1 || this.fileName.indexOf("#") > -1) {
-      this.toast.warning("File must not contain \"@\" or \"#\". Please Remove And Try Again");
+      Swal.fire('File must not contain \"@\" or \"#\". Please Remove And Try Again!', '', 'warning')
       return false;
     }
     else if (this.file !== "" || this.file !== null || this.file !== undefined) {
@@ -559,7 +585,7 @@ export class InitiatorpageComponent implements OnInit {
           return item.DOC_NAME == this.fileName
         })
         if (record) {
-          this.toast.error("This file already exists")
+          Swal.fire('This file already exists!', '', 'warning')
         }
         else {
           this.saveFileInServer();
@@ -649,7 +675,7 @@ export class InitiatorpageComponent implements OnInit {
       .then((res: any) => {
         if (res.hasOwnProperty('tuple')) {
           let DocRes = this.convtojson.convertTupleToJson(res.tuple, 'CLOTP_DOCUMENTS');
-          this.docData.filesArray=[];
+          this.docData.filesArray = [];
           DocRes.forEach((d: any) => {
             this.docData.filesArray.push({
               'DOC_ID': d.DOC_ID,
@@ -658,7 +684,7 @@ export class InitiatorpageComponent implements OnInit {
               "DOC_PATH": d.DOC_PATH,
               "UPLOADED_BY": d.UPLOADED_BY,
               "UPLOADED_ON": d.UPLOADED_ON,
-              'STAGE': d.STAGE ,
+              'STAGE': d.STAGE,
             })
           })
         }
@@ -676,23 +702,23 @@ export class InitiatorpageComponent implements OnInit {
 
   deleteFile() {
     if (this.checkedRows.length == 0) {
-      this.toast.warning("At least one should ne selected!")
+      Swal.fire('Please select at least file!', '', 'warning')
     } else {
-        Swal.fire({
-          title: 'Are you sure?',
-          text: 'Do you want to delete this file!',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Delete',
-        }).then((result) => {
-          if (result.value) {
-            for (let i = 0; i < this.checkedRows.length; i++) {
-              if (this.datavalidate(this.checkedRows[i].DOC_ID) != "") {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to delete this file!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Delete',
+      }).then((result) => {
+        if (result.value) {
+          for (let i = 0; i < this.checkedRows.length; i++) {
+            if (this.datavalidate(this.checkedRows[i].DOC_ID) != "") {
               let dataObj = {
                 tuple: {
-                 old: {
+                  old: {
                     CLOTP_DOCUMENTS: {
                       DOC_ID: this.checkedRows[i].DOC_ID,
                     }
@@ -706,35 +732,34 @@ export class InitiatorpageComponent implements OnInit {
                       return this.checkedRows.indexOf(val) === -1;
                     })
                     this.checkedRows = [];
-                    Swal.fire(
-                      'Deleted!',
-                      'Your imaginary file has been deleted.',
-                      'success'
-                    )
                   }
                 })
             }
-            else{
+            else {
               this.docData.filesArray = this.docData.filesArray.filter((val: any) => {
                 return this.checkedRows.indexOf(val) === -1;
               })
+              this.checkedRows = [];
             }
+            Swal.fire(
+              'Your selected file has been deleted!','','success'
+            )
           }
-          }
-        })
+        }
+      })
 
     }
   }
 
-  downloadFile(doc: any){
+  downloadFile(doc: any) {
     let param = {
       'fileName': doc.DOC_PATH
     };
-    this.service.ajax("DownloadCLOTPDocument",this.namespace,param )
-    .then((res: any) => {
-      if (res.hasOwnProperty('tuple')) {
-        let DownDoc = res.tuple.old.downloadCLOTPDocument.downloadCLOTPDocument;
-     let fileContent = DownDoc["downloadDocument"];
+    this.service.ajax("DownloadCLOTPDocument", this.namespace, param)
+      .then((res: any) => {
+        if (res.hasOwnProperty('tuple')) {
+          let fileContent = res.tuple.old.downloadCLOTPDocument.downloadCLOTPDocument;
+         // let fileContent = DownDoc["downloadDocument"];
           let docContent: any = atob(fileContent);
           let contentArray = new Uint8Array(docContent.length);
           for (let lpvar = 0; lpvar < docContent.length; lpvar++) {
@@ -749,10 +774,10 @@ export class InitiatorpageComponent implements OnInit {
           a.click();
           URL.revokeObjectURL(objectUrl);
         }
-        }).catch((response: { responseJSON: { faultstring: { text: any; }; }; }) => {
-          alert(response.responseJSON.faultstring.text);
-        });
-      
+      }).catch((response: { responseJSON: { faultstring: { text: any; }; }; }) => {
+        alert(response.responseJSON.faultstring.text);
+      });
+
   }
 
 
@@ -769,37 +794,35 @@ export class InitiatorpageComponent implements OnInit {
     return this.docData.filesArray.every((p: any) => p.isChecked);
   }
 
-  completeTask(taskId:string,data: any,status:string,openas:string)
-	{
-		  var titlest = "Task Completed Successfully";
-      let _this =this ;
-			$.cordys.workflow.completeTask(taskId, data, {dataType:'xml'}).done(  function(){
-        Swal.fire({
-          title: titlest,
-          icon: 'success',
-          allowOutsideClick: false
-        }).then (function() {   
-				 		  _this.closeTask(openas);
-					});
-						});//End of done Function
-	}
-  closeTask(openas:string)
-	{
-		this.approvalStage  = "view";
-    if(openas == 'customInboxTask') // if Custom Inbox
-		{
+  completeTask(taskId: string, data: any, status: string, openas: string) {
+    var titlest = "Task Completed Successfully";
+    let _this = this;
+    $.cordys.workflow.completeTask(taskId, data, { dataType: 'xml' }).done(function () {
+      Swal.fire({
+        title: titlest,
+        icon: 'success',
+        allowOutsideClick: false
+      }).then(function () {
+        _this.closeTask(openas);
+      });
+    });//End of done Function
+  }
+  closeTask(openas: string) {
+    // this.approvalStage = "view";
+    if (openas == 'customInboxTask') // if Custom Inbox
+    {
       this.router.navigate(['/inbox']);
     }
-		
-		else if(openas == 'mail')// if accessed through mail
-		{
-			//$scope.viewPage = true;
-			window.close();
-		}
-		else //if Cordys Inbox
-		{
-		}		
-	}
+
+    else if (openas == 'mail')// if accessed through mail
+    {
+      //$scope.viewPage = true;
+      window.close();
+    }
+    else //if Cordys Inbox
+    {
+    }
+  }
 
   datavalidate(data: string | null | undefined) {
     //debugger;

@@ -5,6 +5,7 @@ import { CommonServicesService } from '../services/common-services.service';
 import { SOAPCallService } from '../services/soapcall.service';
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-search',
@@ -26,7 +27,7 @@ export class SearchComponent implements OnInit {
   resourceDepartment: string ="";
   fromDate: string | undefined;
   toDate: string | undefined;
-  status: string ="";
+  status ='';
 
   searchData: any = [];
   show = false;
@@ -41,7 +42,7 @@ export class SearchComponent implements OnInit {
     
    }
    ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes)
+    
   }
 
   ngOnInit(): void {
@@ -65,7 +66,10 @@ export class SearchComponent implements OnInit {
     this.searchData = [];
     this.totalLength = 0;
     this.flag = true;
-    let status = this.datavalidate(this.search.status) == "Saved" ? 0 : this.datavalidate(this.search.status) == "In Progress" ? 2 : this.datavalidate(this.search.status) == "Completed" ? 1 : null
+    if(new Date(this.datavalidate(this.search.toDate)) < new Date(this.datavalidate(this.search.fromDate))){
+      return Swal.fire('ToDate not greater than FromDate', "", 'warning');
+    }
+    let status =this.datavalidate(this.search.status) == "In Progress" ? 2 : this.datavalidate(this.search.status) == "Completed" ? 1 : null
     switch (item) {
       case 'requestNumber':
         this.datavalidate(this.search.requestNumber) == "" ? this.flag = false : this.param = { 'RequestNumber': this.datavalidate(this.search.requestNumber) }
@@ -114,18 +118,95 @@ export class SearchComponent implements OnInit {
           }
           this.show = this.totalLength == 0 ? true : false;
         })
-      : this.toast.error("fill data at least one field!")
+      : Swal.fire('Please fill the data at least one field!', "", 'warning');
   }
 
-  showSearchCLOTP(requestNumber: string) {
+  showSearchCLOTP(item: any) {
     let param = {
-      'REQUEST_NUMBER': this.datavalidate(requestNumber),
+      'REQUEST_NUMBER': this.datavalidate(item.REQUEST_NUMBER),
     }
     this.service.ajax("GetCLOTPNoByreqNODetails", this.namespace, param)
       .then((ajaxResponse: any) => {
         if (ajaxResponse.hasOwnProperty('tuple')) {
           let CLOTP_NO = ajaxResponse.tuple.old.CLOTP_DETAILS.CLOTP_NO
-          this.router.navigate(['/home'], { queryParams: { CLOTP_NO: CLOTP_NO } });
+          let STATUS = ajaxResponse.tuple.old.CLOTP_DETAILS.STATUS
+          this.router.navigate(['/home'], { queryParams: { CLOTP_NO: CLOTP_NO,
+             page: STATUS == '0' ? 'savePage' : 'viewPage'} });
+        }
+      })
+  }
+
+  exportToExcel(){
+    let param = {
+      'requestNumber': this.datavalidate(this.search.requestNumber),
+      'requestNumberName': this.datavalidate(this.search.requestName),
+      'resourceType': this.datavalidate(this.search.resourceType),
+      'resourceDepartment': this.datavalidate(this.search.resourceDepartment),
+      'fromDate': this.dtpipe.transform(this.datavalidate(this.search.fromDate), 'dd-MM-yy'),
+      'toDate': this.dtpipe.transform(this.datavalidate(this.search.toDate), 'dd-MM-yy'),
+      'status': this.datavalidate(this.search.status) == "In Progress" ? 2 : this.datavalidate(this.search.status) == "Completed" ? 1 : 0
+    }
+    this.service.ajax("GetCLOTPExportExcel", this.namespace, param)
+      .then((ajaxResponse: any) => {
+        if (ajaxResponse.hasOwnProperty('tuple')) {
+          let fileContent = ajaxResponse.tuple.old.getCLOTPExportExcel.getCLOTPExportExcel;
+          // let fileContent = DownDoc["downloadDocument"];
+           let docContent: any = atob(fileContent);
+           let contentArray = new Uint8Array(docContent.length);
+           for (let lpvar = 0; lpvar < docContent.length; lpvar++) {
+             contentArray[lpvar] = docContent.charCodeAt(lpvar);
+           }
+           let xlBlob = new Blob([contentArray], { type: "application/octet-stream" });
+           // saveAs(xlBlob, fileName);
+           const a = document.createElement('a')
+           const objectUrl = URL.createObjectURL(xlBlob)
+           a.href = objectUrl
+          a.download = "CLOTPExcel.xls";
+           a.click();
+           URL.revokeObjectURL(objectUrl);
+        }
+      })
+  }
+  summaryReport(){
+    let param = {
+      'request_Number': this.datavalidate(this.search.requestNumber),
+      'requestorTokenName': this.datavalidate(this.search.requestName),
+      'resourceType': this.datavalidate(this.search.resourceType),
+      'resourceDepartment': this.datavalidate(this.search.resourceDepartment),
+      'from_Date': this.dtpipe.transform(this.datavalidate(this.search.fromDate), 'dd-MM-yy'),
+      'to_Date': this.dtpipe.transform(this.datavalidate(this.search.toDate), 'dd-MM-yy'),
+      'status': this.datavalidate(this.search.status) == "In Progress" ? 2 : this.datavalidate(this.search.status) == "Completed" ? 1 : 0
+    }
+    this.service.ajax("GenerateClotpDetailsReport", this.namespace, param)
+    .then((ajaxResponse: any) => {
+      if (ajaxResponse.hasOwnProperty('tuple')) {
+        let fileName = ajaxResponse.tuple.old.generateClotpDetailsReport.generateClotpDetailsReport;
+        this.downloadReportpdf(fileName);
+      }
+    })
+  }
+  downloadReportpdf(fileName: string){
+    let param = {
+      'fileName': this.datavalidate(fileName),
+    }
+    this.service.ajax("DownloadCLOTPReport", this.namespace, param)
+      .then((ajaxResponse: any) => {
+        if (ajaxResponse.hasOwnProperty('tuple')) {
+          let fileContent = ajaxResponse.tuple.old.downloadCLOTPReport.downloadCLOTPReport;
+          // let fileContent = DownDoc["downloadDocument"];
+           let docContent: any = atob(fileContent);
+           let contentArray = new Uint8Array(docContent.length);
+           for (let lpvar = 0; lpvar < docContent.length; lpvar++) {
+             contentArray[lpvar] = docContent.charCodeAt(lpvar);
+           }
+           let xlBlob = new Blob([contentArray], { type: "application/octet-stream" });
+           // saveAs(xlBlob, fileName);
+           const a = document.createElement('a')
+           const objectUrl = URL.createObjectURL(xlBlob)
+           a.href = objectUrl
+          a.download = fileName;
+           a.click();
+           URL.revokeObjectURL(objectUrl);
         }
       })
   }

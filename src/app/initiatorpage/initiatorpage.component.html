@@ -2,7 +2,7 @@
 <form [formGroup]="requestdetailform">
 <div class="mt-5 ">
     <mat-accordion>
-        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide">
+        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide || viewPage">
             <mat-expansion-panel-header>
                 <mat-panel-description class="detailgrid">
                     <h2>Request Details</h2>
@@ -20,9 +20,9 @@
                             <input class="form-control" type="text" formControlName="requestordepartment">
                         </div>
                         <div class="col-lg-3">
-                            <label class="form-label" >Resource Type<span class="required" *ngIf="savedStatus=='0'">*</span></label>
+                            <label class="form-label" >Resource Type<span class="required" [hidden]="this.requestdetailform.controls['resourcetype'].value">*</span></label>
                             <select formControlName="resourcetype" class="form-select"
-                                [ngClass]="{'boxborderred': submitted && resourcetype?.invalid ,'dIconHide': !submitBtnHide}"
+                                [ngClass]="{'boxborderred': !isValid && resourcetype?.invalid ,'dIconHide': !submitBtnHide || this.requestdetailform.controls['resourcetype'].value}"
                                 (change)="res_typeChange(sel.value)"  #sel>
                                 <option value="">-- select --</option>
                                 <option *ngFor="let item1 of ResourceTypeDropdown"  [ngValue]="item1">{{item1}}</option>
@@ -61,7 +61,7 @@
                         </div>
                         <div class="col-lg-3 input-box">
                             <label class="form-label">Period From<span class="required" *ngIf="savedStatus=='0'">*</span></label>
-                            <input matInput [matDatepicker]="picker1" class="form-control" formControlName="periodfrom" [ngClass]="{'boxborderred': submitted && periodfrom?.invalid}">
+                            <input matInput [matDatepicker]="picker1" [min]="todayDate" class="form-control" formControlName="periodfrom" [ngClass]="{'boxborderred': submitted && periodfrom?.invalid}">
                             <mat-datepicker-toggle matSuffix [for]="picker1" id="datepickIcon"></mat-datepicker-toggle>
                             <mat-datepicker #picker1></mat-datepicker>
                     
@@ -70,7 +70,7 @@
                     <div class="row mt-3 ">
                         <div class="col-lg-3 input-box">
                             <label class="form-label">Period To<span class="required" *ngIf="savedStatus=='0'">*</span></label>
-                            <input matInput [matDatepicker]="picker2" class="form-control" formControlName="periodto" [ngClass]="{'boxborderred': submitted && periodto?.invalid}">
+                            <input matInput [matDatepicker]="picker2" [min]="todayDate" class="form-control" formControlName="periodto" [ngClass]="{'boxborderred': submitted && periodto?.invalid}">
                             <mat-datepicker-toggle matSuffix [for]="picker2" id="datepickIcon"></mat-datepicker-toggle>
                             <mat-datepicker #picker2></mat-datepicker>
                            
@@ -89,7 +89,7 @@
 
 <div class="mt-5 " >
     <mat-accordion>
-        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide" >
+        <mat-expansion-panel (opened)="documentpanel = true" (closed)="documentpanel = false" [expanded]="!submitBtnHide || viewPage" >
             <mat-expansion-panel-header>
                 <mat-panel-description class="detailgrid">
                     <h2>Documents</h2>
@@ -103,7 +103,7 @@
                             <thead>
                                 <tr class="bg-secondary text-white" >
                                     <th><input type="checkbox" [checked]="isAllCheckBoxChecked() && docData.filesArray.length>0"
-                                            (change)="checkAllCheckBox($event)"></th>
+                                            (change)="checkAllCheckBox($event)" [disabled]="!viewPage || docData.filesArray.length == '0'"></th>
                                     <th>Document Name</th>
                                     <th>Uploaded By</th>
                                     <th>Uploaded On</th>
@@ -119,10 +119,10 @@
                                     <td>{{ item.UPLOADED_ON }}</td>
                                 </tr>
                                 <tr>
-                                    <button class=" btn bg-dark mx-1" type="button" (click)="deleteFile()">
+                                    <button class=" btn bg-dark mx-1" type="button" (click)="deleteFile()" [disabled]="checkedRows.length == '0'">
                                         <mat-icon class="text-white">delete</mat-icon>
                                     </button>
-                                    <button class="btn bg-danger mx-1" type="button" (click)="uploadFile()">
+                                    <button class="btn bg-danger mx-1" type="button" (click)="uploadFile()" [disabled]="!viewPage">
                                         <mat-icon class="text-white">upload</mat-icon>
                                     </button>
                                     <form style="display:none">
@@ -143,7 +143,7 @@
 <div class="container-fluid mt-3">
     <div class="row" *ngIf="res_type_selected !== 'show'">
         <div class="col-lg-3">
-            <label class="form-label">Department HOD<span class="required" *ngIf="savedStatus=='0'">*</span></label>
+            <label class="form-label">Department HOD {{submitted}} -- {{HODControl?.invalid}}<span class="required" *ngIf="savedStatus=='0'">*</span></label>
             <div class="input-box rounded">
                 <input type="search" class="form-control rounded-left" placeholder="Search"
                 formControlName="HODControl" [matAutocomplete]="autoHOD" #hod [ngClass]="{'boxborderred': submitted && HODControl?.invalid}"/>
@@ -242,21 +242,21 @@
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-lg-6" >
-            <div *ngIf="!submitBtnHide">
+            <div [hidden]="submitBtnHide || !viewPage">
             <label class="form-label">Remarks</label>
             <input class="form-control" type="text" [(ngModel)]="remarks" [ngClass]="{'boxborderred': rejectSubmitted && remarks == ''}" [ngModelOptions]="{standalone: true}">
         </div>
         </div>
-<div class="col-lg-6" style="margin-top:3%;">
+<div class="col-lg-6" style="margin-top:3%;" *ngIf="viewPage"> 
     <div *ngIf="submitBtnHide">
     <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="save('save')">
-        <mat-icon class="text-red">save</mat-icon>Save
+        <mat-icon class="text-red">save</mat-icon>Save 
     </button>
     <button type="button" class="btn btn-sm btn-danger mx-2" (click)="submit()">
         <mat-icon class="text-red">done</mat-icon>Submit
     </button>
 </div>
-<div *ngIf="!submitBtnHide">
+<div  *ngIf="!submitBtnHide">
     <button type="button" class="btn btn-sm btn-outline-danger mx-2" (click)="submitTask('0')">
         <mat-icon class="text-red">close</mat-icon>Reject
     </button>
